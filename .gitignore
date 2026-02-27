@@ -1,0 +1,12 @@
+# Cloned repositories (created by deploy script)
+detectflow-repos/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
