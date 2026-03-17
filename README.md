@@ -60,7 +60,16 @@
 - At least **4 CPU cores** available
 - At least **40 GB disk space**
 
-### One-Command Deploy
+### Deployment Options
+
+This repository includes two Minikube deployment scripts:
+
+| Script | Purpose |
+| --- | --- |
+| `deploy-detectflow-minikube.sh` | Builds DetectFlow images locally from source repositories, then deploys them into Minikube. |
+| `deploy-detectflow-minikube-prebuilt.sh` | Pulls pre-built images from the [`socprime/detectflow-oss`](https://hub.docker.com/r/socprime/detectflow-oss/tags) Docker Hub repository and deploys them directly. |
+
+### Deploy from Source
 
 ```bash
 git clone https://github.com/socprime/detectflow-one-click-local-deployment.git
@@ -69,7 +78,31 @@ chmod +x deploy-detectflow-minikube.sh
 ./deploy-detectflow-minikube.sh
 ```
 
-The script automatically clones all required repositories into a `detectflow-repos/` subdirectory, installs all dependencies and deploys the full stack.
+The script automatically clones all required repositories into a `detectflow-repos/` subdirectory, builds the required images locally and deploys the full stack.
+
+### Deploy with Pre-built Images
+
+```bash
+git clone https://github.com/socprime/detectflow-one-click-local-deployment.git
+cd detectflow-one-click-local-deployment
+chmod +x deploy-detectflow-minikube-prebuilt.sh
+./deploy-detectflow-minikube-prebuilt.sh
+```
+
+This variant skips local image builds and uses pre-built images published to Docker Hub.
+
+### Updating Pre-built Image Versions
+
+If you need to change the image versions used by the pre-built deployment, update these variables in `deploy-detectflow-minikube-prebuilt.sh`:
+
+```bash
+# Pre-built Docker Hub images
+IMAGE_BACKEND="socprime/detectflow-oss:admin-panel-be-oss.v0.9.4"
+IMAGE_UI="socprime/detectflow-oss:admin-panel-ui-oss.v0.9.4"
+IMAGE_FLINK="socprime/detectflow-oss:flink-sigma-detector-oss.v0.9.4"
+```
+
+Before changing them, verify the available tags in the [`socprime/detectflow-oss`](https://hub.docker.com/r/socprime/detectflow-oss/tags) Docker Hub repository.
 
 ---
 
@@ -217,8 +250,9 @@ kubectl logs <pod-name> -n flink
 
 ### Image pull errors
 
-- Images are built locally in minikube. Ensure `imagePullPolicy: Never` is set.
-- Rebuild: `minikube image build -t <image>:local <path>`
+- If you use `deploy-detectflow-minikube.sh`, images are built locally in Minikube. Ensure `imagePullPolicy: Never` is set.
+- If you use `deploy-detectflow-minikube-prebuilt.sh`, confirm the image tags in the script exist in the [`socprime/detectflow-oss`](https://hub.docker.com/r/socprime/detectflow-oss/tags) Docker Hub repository.
+- For locally built images, rebuild with: `minikube image build -t <image>:local <path>`
 
 ### Minikube out of resources
 
