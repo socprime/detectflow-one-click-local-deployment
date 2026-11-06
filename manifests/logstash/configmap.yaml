@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  labels:
+    app: logstash
+data:
+  logstash.conf: |
+    input {
+      syslog {
+        port => ${LOGSTASH_SYSLOG_PORT}
+        ecs_compatibility => "disabled"
+        type => "syslog"
+      }
+      tcp {
+        port => ${LOGSTASH_JSON_PORT}
+        codec => json
+        ecs_compatibility => "disabled"
+        type => "json"
+      }
+      tcp {
+        port => ${LOGSTASH_TEXT_PORT}
+        ecs_compatibility => "disabled"
+        type => "unstructured"
+      }
+    }
+
+    filter {}
+
+    output {
+      kafka {
+        topic_id => "logstash-%{type}"
+        bootstrap_servers => "${LOGSTASH_KAFKA_BOOTSTRAP}"
+        codec => "json_lines"
+      }
+    }

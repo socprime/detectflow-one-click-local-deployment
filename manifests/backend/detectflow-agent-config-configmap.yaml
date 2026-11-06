@@ -1,0 +1,23 @@
+# LLM configuration for the DetectFlow agent jobs the backend launches on Flink.
+# Values come from .env via envsubst (rendered at apply time). Namespace is set by
+# the deploy (`kubectl apply -n ${NAMESPACE}`), so it is intentionally omitted here
+# to match the other backend manifests.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: detectflow-agent-config
+data:
+  LLM_BASE_URL: "${LLM_BASE_URL}"
+  LLM_MODEL: "${LLM_MODEL}"
+  LLM_CALLS_PER_MINUTE: "${LLM_CALLS_PER_MINUTE}"
+  LLM_MAX_RETRIES: "${LLM_MAX_RETRIES}"
+  LLM_MAX_TOKENS: "${LLM_MAX_TOKENS}"
+  LLM_PROMPT_CHAR_BUDGET: "${LLM_PROMPT_CHAR_BUDGET}"
+  MAX_CONCURRENT_LLM_REQUESTS: "${MAX_CONCURRENT_LLM_REQUESTS}"
+  # Self-signed LLM CA (optional). SSL_CERT_FILE is the in-container path to the CA
+  # bundle; it is empty unless LLM_CA_FILE is set in .env (the deploy computes it),
+  # so by default the agent uses the system trust store. The CA itself is projected
+  # into the Secret 'detectflow-agent-secrets' under basename(SSL_CERT_FILE).
+  # LLM_SSL_VERIFY defaults to "true"; set "false" in .env only for testing.
+  SSL_CERT_FILE: "${SSL_CERT_FILE}"
+  LLM_SSL_VERIFY: "${LLM_SSL_VERIFY}"

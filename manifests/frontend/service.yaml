@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-panel-ui
+  labels:
+    app.kubernetes.io/name: admin-panel-ui
+spec:
+  type: NodePort
+  ports:
+  - name: app
+    port: 4173
+    targetPort: http
+    nodePort: 30173
+  selector:
+    app.kubernetes.io/name: admin-panel-ui
+    app.kubernetes.io/instance: admin-panel-ui

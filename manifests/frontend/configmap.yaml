@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: admin-panel-ui-config
+data:
+  VITE_API_BASE_URL: "/api/v1"
+  VITE_API_PROXY_TARGET: "http://admin-panel-be:8000"
+  VITE_PREVIEW_ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0,${SERVER_HOST}"
+  VITE_USE_MOCK_API: "false"
+  VITE_USE_MOCK_AUTH: "false"
+  VITE_ENVIRONMENT_STAGE: "local"
+  VITE_SSE_ENABLED: "true"
+  VITE_SSE_RECONNECT: "true"
+  VITE_SSE_RECONNECT_INTERVAL: "3000"
+  VITE_SSE_RECONNECT_ATTEMPTS: "10"

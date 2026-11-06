@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+      - name: kafka
+        image: ${IMAGE_KAFKA}
+        ports:
+        - containerPort: 9092
+          name: broker
+        - containerPort: 9093
+          name: controller
+        - containerPort: 9094
+          name: external
+        env:
+        # KRaft (no ZooKeeper) settings
+        - name: KAFKA_NODE_ID
+          value: "1"
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker,controller"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@localhost:9093"
+        # Listeners - PLAINTEXT for in-cluster, EXTERNAL for host via port-forward
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://kafka:9092,EXTERNAL://${SERVER_HOST}:${KAFKA_EXTERNAL_PORT}"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+        # Cluster ID (static for local dev)
+        - name: CLUSTER_ID
+          value: "MkU3OEVBNTcwNTJENDM2Qg"
+        # Performance
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "${KAFKA_NUM_PARTITIONS}"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "${KAFKA_LOG_RETENTION_HOURS}"
+        - name: KAFKA_LOG_ROLL_MS
+          value: "${KAFKA_LOG_ROLL_MS}"
+        - name: KAFKA_LOG_DIRS
+          value: "/var/lib/kafka/data"
+        # JVM heap + throughput tuning for large data streams
+        - name: KAFKA_HEAP_OPTS
+          value: "${KAFKA_HEAP_OPTS}"
+        - name: KAFKA_NUM_NETWORK_THREADS
+          value: "${KAFKA_NUM_NETWORK_THREADS}"
+        - name: KAFKA_NUM_IO_THREADS
+          value: "${KAFKA_NUM_IO_THREADS}"
+        - name: KAFKA_SOCKET_SEND_BUFFER_BYTES
+          value: "${KAFKA_SOCKET_SEND_BUFFER_BYTES}"
+        - name: KAFKA_SOCKET_RECEIVE_BUFFER_BYTES
+          value: "${KAFKA_SOCKET_RECEIVE_BUFFER_BYTES}"
+        - name: KAFKA_SOCKET_REQUEST_MAX_BYTES
+          value: "${KAFKA_SOCKET_REQUEST_MAX_BYTES}"
+        volumeMounts:
+        - name: kafka-data
+          mountPath: /var/lib/kafka/data
+        resources:
+          requests:
+            cpu: "${KAFKA_CPU_REQUEST}"
+            memory: ${KAFKA_MEM_REQUEST}
+          limits:
+            cpu: "${KAFKA_CPU_LIMIT}"
+            memory: ${KAFKA_MEM_LIMIT}
+        readinessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: kafka-data
+        persistentVolumeClaim:
+          claimName: kafka-pvc

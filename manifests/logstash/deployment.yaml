@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  labels:
+    app: logstash
+spec:
+  replicas: ${LOGSTASH_REPLICAS}
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: ${IMAGE_LOGSTASH}
+        env:
+        - name: LS_JAVA_OPTS
+          value: "${LOGSTASH_JAVA_OPTS}"
+        - name: PIPELINE_WORKERS
+          value: "${LOGSTASH_PIPELINE_WORKERS}"
+        - name: PIPELINE_BATCH_SIZE
+          value: "${LOGSTASH_PIPELINE_BATCH_SIZE}"
+        ports:
+        - { containerPort: ${LOGSTASH_SYSLOG_PORT}, protocol: TCP }
+        - { containerPort: ${LOGSTASH_JSON_PORT}, protocol: TCP }
+        - { containerPort: ${LOGSTASH_TEXT_PORT}, protocol: TCP }
+        volumeMounts:
+        - name: pipeline
+          mountPath: /usr/share/logstash/pipeline
+          readOnly: true
+        resources:
+          requests:
+            cpu: "${LOGSTASH_CPU_REQUEST}"
+            memory: "${LOGSTASH_MEM_REQUEST}"
+          limits:
+            cpu: "${LOGSTASH_CPU_LIMIT}"
+            memory: "${LOGSTASH_MEM_LIMIT}"
+      volumes:
+      - name: pipeline
+        configMap:
+          name: logstash-pipeline

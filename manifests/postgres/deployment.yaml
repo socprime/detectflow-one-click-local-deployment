@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: ${IMAGE_POSTGRES}
+        args:
+        - -c
+        - shared_buffers=${PG_SHARED_BUFFERS}
+        - -c
+        - effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE}
+        - -c
+        - maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM}
+        - -c
+        - work_mem=${PG_WORK_MEM}
+        - -c
+        - max_connections=${PG_MAX_CONNECTIONS}
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: detectflow
+        - name: POSTGRES_USER
+          value: detectflow
+        - name: POSTGRES_PASSWORD
+          value: detectflow
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            cpu: "${PG_CPU_REQUEST}"
+            memory: ${PG_MEM_REQUEST}
+          limits:
+            cpu: "${PG_CPU_LIMIT}"
+            memory: ${PG_MEM_LIMIT}
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "detectflow", "-d", "detectflow"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc

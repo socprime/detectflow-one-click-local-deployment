@@ -1,0 +1,48 @@
+# Traefik Helm values (rendered via envsubst). One TLS entrypoint per service;
+# each entrypoint's exposedPort is the host port the service is reached on, so a
+# port-forward of svc/traefik <port>:<port> serves HTTPS on that same port.
+service:
+  type: ClusterIP
+
+# Default certificate for all TLS entrypoints. Our IngressRoutes match on path only
+# (no Host), so a per-route secretName cert never lands in the SNI store - Traefik
+# would serve its built-in default cert. Setting df-tls as the default cert fixes it.
+# The secret must live in this (the Traefik release) namespace.
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: ${TLS_SECRET_NAME}
+
+ports:
+  uihttps:
+    port: 8001
+    exposedPort: ${UI_PORT}
+    expose:
+      default: true
+    protocol: TCP
+    tls:
+      enabled: true
+  apihttps:
+    port: 8002
+    exposedPort: ${API_PORT}
+    expose:
+      default: true
+    protocol: TCP
+    tls:
+      enabled: true
+  kafkauihttps:
+    port: 8003
+    exposedPort: ${KAFKA_UI_PORT}
+    expose:
+      default: true
+    protocol: TCP
+    tls:
+      enabled: true
+  dashboardhttps:
+    port: 8004
+    exposedPort: ${DASHBOARD_PORT}
+    expose:
+      default: true
+    protocol: TCP
+    tls:
+      enabled: true

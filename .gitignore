@@ -1,6 +1,3 @@
-# Cloned repositories (created by deploy script)
-detectflow-repos/
-
 # macOS
 .DS_Store
 
@@ -10,3 +7,11 @@ detectflow-repos/
 *.swp
 *.swo
 *~
+
+.env
+
+# TLS cert/key files (provided mode) - never commit secrets
+certs/
+*.pem
+*.key
+*.crt

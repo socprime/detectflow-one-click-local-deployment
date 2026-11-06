@@ -1,0 +1,18 @@
+# Traefik IngressRoute for the Kubernetes dashboard. Lives in the dashboard's own
+# namespace (kubernetes-dashboard), binds the dashboardhttps entrypoint to the
+# dashboard service, and uses Traefik's default cert (df-tls) via `tls: {}`.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: detectflow-dashboard
+  namespace: ${DASHBOARD_NS}
+spec:
+  entryPoints:
+    - dashboardhttps
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: kubernetes-dashboard
+          port: 80
+  tls: {}

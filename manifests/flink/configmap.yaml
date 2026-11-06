@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-config
+  namespace: ${NAMESPACE}
+data:
+  # Kafka consumer starting offset for new pipelines (earliest/latest/committed)
+  KAFKA_STARTING_OFFSET: "latest"
+
+  # Python application logging
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "console"
+
+  # Polars native build. The image ships both polars-runtime-32 (AVX2, fast) and
+  # polars-runtime-compat (SSE4.2). Polars prefers compat when this is unset, so
+  # the image sets 32. Override with compat on CPUs that lack AVX2 (Sandy Bridge,
+  # or a generic x86-64-v2 / kvm64 VM model)
+  # POLARS_FORCE_PKG: "compat"
