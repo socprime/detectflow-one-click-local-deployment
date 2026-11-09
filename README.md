@@ -1,4 +1,4 @@
-# DetectFlow Demo - Complete Deployment Guide
+# Prime Detect OSS - Complete Deployment Guide
 
 ## Table of Contents
 
@@ -12,13 +12,13 @@
 
 ## 1. Project Overview
 
-**DetectFlow** is a real-time SIEM detection pipeline platform by SOC Prime. It applies Sigma rules on streaming events from Apache Kafka using Apache Flink, providing sub-second threat detection.
+**Prime Detect** is a real-time SIEM detection pipeline platform by SOC Prime. It applies Sigma rules on streaming events from Apache Kafka using Apache Flink, providing sub-second threat detection.
 
  > **Note:** The deployment script and all configuration files in this repository contain placeholder data (mock secrets) and are intended for demonstration purposes only.
  >
  > Image names are configurable in `.env` (`IMAGE_BACKEND`, `IMAGE_UI`, `IMAGE_FLINK`, `IMAGE_AGENT`, `IMAGE_CORRELATION`).
  >
- > **Current release: DetectFlow v2.3.2** - the public `socprime/detectflow-oss` images are preset in `.env.example`; keep all five image tags on the same release (versions noted elsewhere, e.g. "backend ≥ v2.2.0", are minimums for a feature).
+ > **Current release: Prime Detect v2.3.2** - the public `socprime/detectflow-oss` images are preset in `.env.example`; keep all five image tags on the same release (versions noted elsewhere, e.g. "backend ≥ v2.2.0", are minimums for a feature).
 
 ---
 
@@ -77,14 +77,14 @@ Key values to set:
 | `POSTGRES_PF_ADDRESS` | bind address for the PostgreSQL forward only. `127.0.0.1` (default) = on the server only, connect through an SSH tunnel - see [PostgreSQL Access (pgAdmin)](#postgresql-access-pgadmin); `0.0.0.0` = reachable from the network. |
 | `MINIKUBE_CPUS` / `MINIKUBE_MEMORY` / `MINIKUBE_DISK` | Cluster sizing (default 6 / 12288 MB / 100g). Keep at least ~4 GB RAM for the host, and keep the sum of the component memory limits (`PG_MEM_LIMIT`, `KAFKA_MEM_LIMIT`, `LOGSTASH_MEM_LIMIT`, ...) well below `MINIKUBE_MEMORY`. |
 | `MINIKUBE_CONTAINER_RUNTIME` | Container runtime inside the minikube node: `containerd` (default), `docker` or `cri-o`. Pinned so it doesn't depend on the installed minikube version. Applies only when the cluster is created - see [Cluster runs the docker container runtime](#cluster-runs-the-docker-container-runtime). |
-| `IMAGE_BACKEND` / `IMAGE_UI` / `IMAGE_FLINK` / `IMAGE_AGENT` / `IMAGE_CORRELATION` | Public Docker Hub image tags for the DetectFlow services (`socprime/detectflow-oss`), preset to the current release in `.env.example`. **All five are required** - the script fails fast if any is empty. `IMAGE_AGENT` (df-agent) and `IMAGE_CORRELATION` (df-correlation) are the job images the backend launches. |
+| `IMAGE_BACKEND` / `IMAGE_UI` / `IMAGE_FLINK` / `IMAGE_AGENT` / `IMAGE_CORRELATION` | Public Docker Hub image tags for the Prime Detect services (`socprime/detectflow-oss`), preset to the current release in `.env.example`. **All five are required** - the script fails fast if any is empty. `IMAGE_AGENT` (df-agent) and `IMAGE_CORRELATION` (df-correlation) are the job images the backend launches. |
 | `PG_*` | PostgreSQL resources + tuning. |
 | `KAFKA_*` | Kafka resources, JVM heap, threads, partitions, retention. `KAFKA_LOG_RETENTION_HOURS` (default 2) works together with `KAFKA_LOG_ROLL_MS` (default 10 min): Kafka deletes only whole closed segments, so the roll interval makes old data actually go away on time. |
-| `LLM_*` / `MAX_CONCURRENT_LLM_REQUESTS` | DetectFlow Agent (LLM) config - endpoint, model, API key, and rate/size tuning. Optional; see below. |
+| `LLM_*` / `MAX_CONCURRENT_LLM_REQUESTS` | Prime Detect Agent (LLM) config - endpoint, model, API key, and rate/size tuning. Optional; see below. |
 
 > `.env` is gitignored.
 
-### DetectFlow Agent (LLM) configuration
+### Prime Detect Agent (LLM) configuration
 
 The v2.1.0+ backend can launch **agent jobs** on Flink that call an LLM. Their
 configuration is rendered from `.env` (via `envsubst`) into two manifests that the
@@ -126,9 +126,9 @@ Secret and sets `SSL_CERT_FILE` in the ConfigMap so the backend mounts and trust
 ### Deploy
 
 ```bash
-git clone https://github.com/socprime/detectflow-one-click-local-deployment.git
-cd detectflow-one-click-local-deployment
-git checkout v2.3.2               # one branch per DetectFlow release
+git clone https://github.com/socprime/-one-click-local-deployment.git
+cd -one-click-local-deployment
+git checkout v2.3.2               # one branch per  release
 cp .env.example .env          # then set SERVER_HOST (and any optional tunables)
 chmod +x deploy-detectflow-minikube.sh
 
@@ -153,7 +153,7 @@ The script installs missing tools (Docker, minikube, kubectl, helm, kcat, envsub
 MINIKUBE_FORCE=true ./deploy-detectflow-minikube.sh
 ```
 
-> **Note:** No images are built locally. All DetectFlow images are public on Docker Hub (`socprime/detectflow-oss`) - no Docker Hub login is needed.
+> **Note:** No images are built locally. All Prime Detect images are public on Docker Hub (`socprime/detectflow-oss`) - no Docker Hub login is needed.
 
 ---
 
@@ -163,8 +163,8 @@ After deployment, the script sets up **self-healing port-forwards** (bound to `P
 
 | Service | URL | Notes |
 | --- | --- | --- |
-| **DetectFlow UI** | `https://SERVER_HOST:4173` | Main admin panel |
-| **DetectFlow Backend API** | `https://SERVER_HOST:8000` | REST API |
+| **Prime Detect UI** | `https://SERVER_HOST:4173` | Main admin panel |
+| **Prime Detect Backend API** | `https://SERVER_HOST:8000` | REST API |
 | **Kafka UI** | `https://SERVER_HOST:8080` | Kafka monitoring & management |
 | **Kafka Broker** | `SERVER_HOST:9094` | External listener for remote access (plaintext) |
 | **PostgreSQL** | `127.0.0.1:5432` on the server | Server-only by default - connect with pgAdmin over an SSH tunnel, see [PostgreSQL Access (pgAdmin)](#postgresql-access-pgadmin). db / user `detectflow` (plaintext) |
@@ -177,7 +177,7 @@ After deployment, the script sets up **self-healing port-forwards** (bound to `P
 
 ### HTTPS / TLS (on by default, per-port)
 
-**TLS is on by default (`selfsigned`)** because the DetectFlow **UI is effectively HTTPS-only** - its image ships a `Content-Security-Policy: … upgrade-insecure-requests` header, so served over plain HTTP the browser upgrades its assets to https and the page renders **blank**. With TLS on, Traefik terminates TLS so the **UI, API, Kafka UI, and K8s dashboard serve HTTPS on their existing port numbers** (`https://…:4173`, etc.) and the UI loads. Configure in `.env`:
+**TLS is on by default (`selfsigned`)** because the Prime Detect **UI is effectively HTTPS-only** - its image ships a `Content-Security-Policy: … upgrade-insecure-requests` header, so served over plain HTTP the browser upgrades its assets to https and the page renders **blank**. With TLS on, Traefik terminates TLS so the **UI, API, Kafka UI, and K8s dashboard serve HTTPS on their existing port numbers** (`https://…:4173`, etc.) and the UI loads. Configure in `.env`:
 
 ```bash
 TLS_ENABLED=true
@@ -194,8 +194,8 @@ When enabled, the UI/API/Kafka-UI/dashboard ports serve HTTPS **instead of** HTT
 
 | Service | URL |
 | --- | --- |
-| **DetectFlow UI** | `https://SERVER_HOST:4173` |
-| **DetectFlow Backend API** | `https://SERVER_HOST:8000` |
+| **Prime Detect UI** | `https://SERVER_HOST:4173` |
+| **Prime Detect Backend API** | `https://SERVER_HOST:8000` |
 | **Kafka UI** | `https://SERVER_HOST:8080` |
 | **K8s Dashboard** | `https://SERVER_HOST:8443` |
 
@@ -231,9 +231,9 @@ echo | openssl s_client -connect SERVER_HOST:4173 -servername SERVER_HOST 2>/dev
 kubectl rollout restart deployment/traefik -n traefik
 ```
 
-### Pipeline Runtime Settings (in the DetectFlow UI)
+### Pipeline Runtime Settings (in the Prime Detect UI)
 
-After the stack is deployed and you log in to the DetectFlow UI, review the **Pipeline Runtime** settings and tune them to your system resources **before you create or run a pipeline**.
+After the stack is deployed and you log in to the Prime Detect UI, review the **Pipeline Runtime** settings and tune them to your system resources **before you create or run a pipeline**.
 
 **Settings to review:**
 
@@ -345,7 +345,7 @@ yourself. In pgAdmin, right-click **Servers → Register → Server…** and fil
 
 | Field | Value |
 | --- | --- |
-| Name | any label, e.g. `DetectFlow (SERVER_HOST)` |
+| Name | any label, e.g. `Prime Detect (SERVER_HOST)` |
 
 #### Connection tab
 
@@ -678,7 +678,7 @@ kubectl get pods -n cert-manager
 
 ### Why the UI needs HTTPS
 
-The DetectFlow UI ships browser-security hardening: its image sends a
+The Prime Detect UI ships browser-security hardening: its image sends a
 `Content-Security-Policy: … upgrade-insecure-requests` header (plus HSTS). This is a
 deliberate security control - it tells browsers to only ever load the app's resources
 over a secure connection, which prevents a page loaded over HTTPS from being downgraded
