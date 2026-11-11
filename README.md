@@ -18,7 +18,7 @@
  >
  > Image names are configurable in `.env` (`IMAGE_BACKEND`, `IMAGE_UI`, `IMAGE_FLINK`, `IMAGE_AGENT`, `IMAGE_CORRELATION`).
  >
- > **Current release: Prime Detect v2.3.2** - the public `socprime/detectflow-oss` images are preset in `.env.example`; keep all five image tags on the same release (versions noted elsewhere, e.g. "backend ≥ v2.2.0", are minimums for a feature).
+ > **Current release: Prime Detect v2.3.3** - the public `socprime/detectflow-oss` images are preset in `.env.example`; keep all five image tags on the same release (versions noted elsewhere, e.g. "backend ≥ v2.2.0", are minimums for a feature).
 
 ---
 
@@ -126,9 +126,9 @@ Secret and sets `SSL_CERT_FILE` in the ConfigMap so the backend mounts and trust
 ### Deploy
 
 ```bash
-git clone https://github.com/socprime/-one-click-local-deployment.git
-cd -one-click-local-deployment
-git checkout v2.3.2               # one branch per  release
+git clone https://github.com/socprime/detectflow-one-click-local-deployment.git
+cd detectflow-one-click-local-deployment
+git checkout v2.3.3               # one branch per Prime Detect release
 cp .env.example .env          # then set SERVER_HOST (and any optional tunables)
 chmod +x deploy-detectflow-minikube.sh
 
@@ -557,7 +557,7 @@ kubectl logs <pod-name> -n flink
 
 ### Image pull errors
 
-- Check the image tags in `.env` exist on Docker Hub (`socprime/detectflow-oss`), e.g. `docker pull socprime/detectflow-oss:admin-panel-be-oss.v2.3.2`
+- Check the image tags in `.env` exist on Docker Hub (`socprime/detectflow-oss`), e.g. `docker pull socprime/detectflow-oss:admin-panel-be-oss.v2.3.3`
 - Look at the pod events: `kubectl describe pod <pod> -n flink`
 - `toomanyrequests` = Docker Hub's anonymous pull rate limit; wait and re-run the deploy
 

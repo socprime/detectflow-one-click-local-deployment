@@ -123,11 +123,11 @@ else
 fi
 
 # Public pre-built Docker Hub images (defaults match .env.example; validated in validate_config).
-IMAGE_BACKEND="${IMAGE_BACKEND:-socprime/detectflow-oss:admin-panel-be-oss.v2.3.2}"
-IMAGE_UI="${IMAGE_UI:-socprime/detectflow-oss:admin-panel-ui-oss.v2.3.2}"
-IMAGE_FLINK="${IMAGE_FLINK:-socprime/detectflow-oss:flink-sigma-detector-oss.v2.3.2}"
-IMAGE_AGENT="${IMAGE_AGENT:-socprime/detectflow-oss:df-agent-oss.v2.3.2}"
-IMAGE_CORRELATION="${IMAGE_CORRELATION:-socprime/detectflow-oss:df-correlation-oss.v2.3.2}"
+IMAGE_BACKEND="${IMAGE_BACKEND:-socprime/detectflow-oss:admin-panel-be-oss.v2.3.3}"
+IMAGE_UI="${IMAGE_UI:-socprime/detectflow-oss:admin-panel-ui-oss.v2.3.3}"
+IMAGE_FLINK="${IMAGE_FLINK:-socprime/detectflow-oss:flink-sigma-detector-oss.v2.3.3}"
+IMAGE_AGENT="${IMAGE_AGENT:-socprime/detectflow-oss:df-agent-oss.v2.3.3}"
+IMAGE_CORRELATION="${IMAGE_CORRELATION:-socprime/detectflow-oss:df-correlation-oss.v2.3.3}"
 
 # PostgreSQL resources + tuning
 IMAGE_POSTGRES="${IMAGE_POSTGRES:-postgres:14-alpine}"
